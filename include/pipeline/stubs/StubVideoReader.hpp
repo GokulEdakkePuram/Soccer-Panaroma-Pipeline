@@ -2,6 +2,8 @@
 
 #include "pipeline/IVideoReader.hpp"
 
+#include <opencv2/videoio.hpp>
+
 namespace pipeline {
 
 // Stub video reader — YOUR TASK: replace this with a real implementation.
@@ -22,7 +24,9 @@ public:
     VideoMetadata metadata() const override;
 
 private:
+    cv::VideoCapture capture_;
     VideoMetadata metadata_;
+    int64_t next_frame_idx_ = 0;
 };
 
 }  // namespace pipeline
