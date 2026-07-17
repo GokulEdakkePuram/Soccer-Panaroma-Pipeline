@@ -1,0 +1,15 @@
+build/
+build_stub/
+output/
+export/
+private/eval/output/
+.venv/
+*.pt
+.cache/
+*.o
+*.a
+*.so
+.DS_Store
+.vscode/
+.idea/
+cmake-build-*/

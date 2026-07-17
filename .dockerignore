@@ -1,0 +1,12 @@
+build/
+build_stub/
+cmake-build-*/
+output/
+export/
+private/
+.git/
+.venv/
+.cache/
+.vscode/
+.idea/
+*.tar.gz

@@ -1,0 +1,13 @@
+{
+  "min_fps": 1.0,
+  "fps_drop_ratio_max": 0.15,
+  "p95_latency_growth_max": 0.25,
+  "memory_rss_growth_max": 0.20,
+  "determinism_epsilon": 0.001,
+  "short_clip_frames": 250,
+  "long_clip_frames": 750,
+  "segment_checks": [
+    {"start_frame": 500, "end_frame": 599},
+    {"start_frame": 1500, "end_frame": 1599}
+  ]
+}

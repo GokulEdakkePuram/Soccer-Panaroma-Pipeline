@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CameraTrackOutput",
+  "type": "object",
+  "required": ["metadata", "frames", "summary"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["video", "width", "height", "fps", "segment"],
+      "properties": {
+        "video": { "type": "string" },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "fps": { "type": "number", "minimum": 0 },
+        "segment": {
+          "type": "object",
+          "required": ["start_frame", "end_frame"],
+          "properties": {
+            "start_frame": { "type": "integer", "minimum": 0 },
+            "end_frame": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "frames": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["frame_idx", "timestamp_ms", "camera_center", "stage_ms"],
+        "properties": {
+          "frame_idx": { "type": "integer", "minimum": 0 },
+          "timestamp_ms": { "type": "number", "minimum": 0 },
+          "camera_center": {
+            "type": "object",
+            "required": ["x", "y"],
+            "properties": {
+              "x": { "type": "number" },
+              "y": { "type": "number" }
+            }
+          },
+          "stage_ms": {
+            "type": "object",
+            "required": ["video_reader", "detector", "camera", "visualizer"],
+            "properties": {
+              "video_reader": { "type": "number", "minimum": 0 },
+              "detector": { "type": "number", "minimum": 0 },
+              "camera": { "type": "number", "minimum": 0 },
+              "visualizer": { "type": "number", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["frames_processed", "avg_fps", "stage_ms_avg"],
+      "properties": {
+        "frames_processed": { "type": "integer", "minimum": 0 },
+        "avg_fps": { "type": "number", "minimum": 0 },
+        "stage_ms_avg": {
+          "type": "object",
+          "required": ["video_reader", "detector", "camera", "visualizer"],
+          "properties": {
+            "video_reader": { "type": "number", "minimum": 0 },
+            "detector": { "type": "number", "minimum": 0 },
+            "camera": { "type": "number", "minimum": 0 },
+            "visualizer": { "type": "number", "minimum": 0 }
+          }
+        },
+        "stage_ms_p95": {
+          "type": "object",
+          "properties": {
+            "video_reader": { "type": "number", "minimum": 0 },
+            "detector": { "type": "number", "minimum": 0 },
+            "camera": { "type": "number", "minimum": 0 },
+            "visualizer": { "type": "number", "minimum": 0 }
+          }
+        }
+      }
+    }
+  }
+}

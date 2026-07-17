@@ -1,0 +1,9 @@
+[project]
+name = "st-pipeline-task"
+version = "0.0.0"
+requires-python = ">=3.10"
+dependencies = []
+
+[dependency-groups]
+maintainer = ["ultralytics>=8.2.0"]
+eval = ["opencv-python-headless>=4.8.0", "tqdm>=4.66.0"]

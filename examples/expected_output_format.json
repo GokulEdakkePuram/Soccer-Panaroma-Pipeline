@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "video": "videos/Pano_AIC_1789_M1_missed_goal.mp4",
+    "width": 3840,
+    "height": 800,
+    "fps": 25.0,
+    "segment": {
+      "start_frame": 0,
+      "end_frame": 249
+    }
+  },
+  "frames": [
+    {
+      "frame_idx": 0,
+      "timestamp_ms": 40.0,
+      "camera_center": { "x": 1920.0, "y": 400.0 },
+      "stage_ms": {
+        "video_reader": 1.2,
+        "detector": 0.0,
+        "camera": 0.1,
+        "visualizer": 0.5
+      }
+    }
+  ],
+  "summary": {
+    "frames_processed": 250,
+    "avg_fps": 24.6,
+    "stage_ms_avg": {
+      "video_reader": 1.1,
+      "detector": 0.0,
+      "camera": 0.1,
+      "visualizer": 0.4
+    },
+    "stage_ms_p95": {
+      "video_reader": 2.0,
+      "detector": 0.0,
+      "camera": 0.2,
+      "visualizer": 1.0
+    }
+  }
+}
