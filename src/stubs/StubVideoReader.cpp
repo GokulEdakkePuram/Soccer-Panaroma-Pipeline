@@ -29,6 +29,9 @@ bool StubVideoReader::open(const std::string& path, const Segment& segment) {
                   << '\n';
         return false;
     }
+    std::clog << "StubVideoReader: opened video " << path << ", "
+              << metadata_.width << "x" << metadata_.height << " @ " << metadata_.fps
+              << " fps, total frames: " << metadata_.total_frames << '\n';
 
     return true;
 }
