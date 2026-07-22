@@ -20,11 +20,6 @@ double elapsed_ms(const Clock::time_point& start) {
     return std::chrono::duration<double, std::milli>(Clock::now() - start).count();
 }
 
-// Bounded FIFO queue between pipeline stages. push() blocks while the queue is
-// full — this is the backpressure that stalls upstream stages when a downstream
-// stage is slow. pop() blocks while empty and returns nullopt once the queue is
-// closed and drained. abort() discards pending items and unblocks both sides,
-// used to tear the pipeline down on error.
 template <typename T>
 class BoundedQueue {
 public:
@@ -124,6 +119,18 @@ bool Pipeline::run() {
         }
     }
 
+    // Warm up the detector before timing starts: the first DNN forward pass
+    // allocates layer buffers and runs slower
+    if (metadata_.width > 0 && metadata_.height > 0) {
+        Frame warmup;
+        warmup.width = metadata_.width;
+        warmup.height = metadata_.height;
+        warmup.data.assign(
+            static_cast<std::size_t>(warmup.width) * static_cast<std::size_t>(warmup.height) * 3,
+            0);
+        detector_->process(warmup);
+    }
+
     const double frame_budget_ms = metadata_.fps > 0.0 ? 1000.0 / metadata_.fps : 40.0;
     const std::size_t queue_depth =
         config_.queue_depth > 0 ? static_cast<std::size_t>(config_.queue_depth) : 1;
@@ -180,7 +187,7 @@ bool Pipeline::run() {
         try {
             while (auto item = read_queue.pop()) {
                 const auto t0 = Clock::now();
-                auto detections = detector_->process(item->frame);
+                auto detections = detector_->process(item->frame); // ReadItem: frame, reader_ms
                 const double detector_ms = elapsed_ms(t0);
                 if (!detect_queue.push(DetectedItem{std::move(item->frame), std::move(detections),
                                                     item->reader_ms, detector_ms})) {

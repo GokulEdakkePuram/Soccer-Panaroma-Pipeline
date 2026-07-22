@@ -1,47 +1,51 @@
 #include "pipeline/stubs/TiledPanoramaDetector.hpp"
 
 #include "pipeline/PanoramaTileLayout.hpp"
+#include "pipeline/YoloPostprocess.hpp"
+
+#include <algorithm>
 
 namespace pipeline {
+namespace {
+
+Frame extract_tile(const Frame& frame, const TileRegion& tile) {
+    Frame out;
+    out.frame_idx = frame.frame_idx;
+    out.timestamp_ms = frame.timestamp_ms;
+    out.width = tile.w;
+    out.height = tile.h;
+    out.data.resize(static_cast<size_t>(tile.w * tile.h * 3));
+
+    for (int y = 0; y < tile.h; ++y) {
+        const int src_y = tile.y0 + y;
+        const size_t src_offset = static_cast<size_t>((src_y * frame.width + tile.x0) * 3);
+        const size_t dst_offset = static_cast<size_t>(y * tile.w * 3);
+        std::copy(frame.data.begin() + static_cast<std::ptrdiff_t>(src_offset),
+                  frame.data.begin() + static_cast<std::ptrdiff_t>(src_offset + tile.w * 3),
+                  out.data.begin() + static_cast<std::ptrdiff_t>(dst_offset));
+    }
+    return out;
+}
+
+}  // namespace
 
 TiledPanoramaDetector::TiledPanoramaDetector(std::unique_ptr<IDetector> tile_detector)
     : tile_detector_(std::move(tile_detector)) {}
 
 std::vector<Detection> TiledPanoramaDetector::process(const Frame& frame) {
-    // TODO: split panorama into tiles (see TASK.md)
-    // TODO: run tile_detector_->process() on each tile — per-tile post-processing is already done
-    // TODO: merge post-processing — offset bboxes to panorama coords, cross-tile NMS, sort
-
-    // Scaffold: center tile only so partial detections appear before full implementation.
     const auto tiles = default_tile_layout(frame.width, frame.height);
-    if (tiles.size() < 3) {
-        return {};
-    }
 
-    const TileRegion& center = tiles[2];
-    Frame tile;
-    tile.frame_idx = frame.frame_idx;
-    tile.timestamp_ms = frame.timestamp_ms;
-    tile.width = center.w;
-    tile.height = center.h;
-    tile.data.resize(static_cast<size_t>(center.w * center.h * 3));
-
-    for (int y = 0; y < center.h; ++y) {
-        const int src_y = center.y0 + y;
-        const size_t src_offset =
-            static_cast<size_t>((src_y * frame.width + center.x0) * 3);
-        const size_t dst_offset = static_cast<size_t>(y * center.w * 3);
-        std::copy(frame.data.begin() + static_cast<std::ptrdiff_t>(src_offset),
-                  frame.data.begin() + static_cast<std::ptrdiff_t>(src_offset + center.w * 3),
-                  tile.data.begin() + static_cast<std::ptrdiff_t>(dst_offset));
+    std::vector<Detection> merged;
+    for (const auto& tile : tiles) {
+        const Frame cropped = extract_tile(frame, tile);
+        auto detections = tile_detector_->process(cropped);
+        for (auto& det : detections) {
+            det.bbox.x += static_cast<float>(tile.x0);
+            det.bbox.y += static_cast<float>(tile.y0);
+        }
+        merged.insert(merged.end(), detections.begin(), detections.end());
     }
-
-    auto detections = tile_detector_->process(tile);
-    for (auto& det : detections) {
-        det.bbox.x += static_cast<float>(center.x0);
-        det.bbox.y += static_cast<float>(center.y0);
-    }
-    return detections;
+    return nms_detections(merged);
 }
 
 }  // namespace pipeline

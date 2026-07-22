@@ -15,6 +15,9 @@
 #include "pipeline/stubs/TiledPanoramaDetector.hpp"
 #endif
 
+#include <opencv2/core.hpp>
+
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -118,6 +121,9 @@ int main(int argc, char** argv) {
     if (!config.has_value()) {
         return 2;
     }
+
+    // Cap OpenCV's internal thread pool below the core count.
+    cv::setNumThreads(std::max(2, cv::getNumberOfCPUs() - 4));
 
     if (!model_file_ready(config->model_path)) {
         return 2;

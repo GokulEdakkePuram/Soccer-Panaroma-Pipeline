@@ -7,8 +7,7 @@
 namespace pipeline {
 namespace {
 
-// EMA factor: higher follows the action more tightly, lower gives steadier
-// camera motion.
+// Smoothing factor
 constexpr float kSmoothingAlpha = 0.2f;
 
 }  // namespace
@@ -18,7 +17,7 @@ CameraTarget PassthroughCamera::update(int64_t /*frame_idx*/,
                                        const std::optional<CameraTarget>& prev_target,
                                        int frame_width,
                                        int frame_height) {
-    // 1. Filter: confident player detections only.
+    // Select detections of person class and above confidence threshold, sum them up
     float sum_x = 0.0f;
     float sum_y = 0.0f;
     float sum_conf = 0.0f;
@@ -35,11 +34,11 @@ CameraTarget PassthroughCamera::update(int64_t /*frame_idx*/,
 
     CameraTarget target;
     if (count > 0) {
-        // 2. Centroid of the visible players.
+        // Centroid of the detected players.
         const float measured_x = sum_x / static_cast<float>(count);
         const float measured_y = sum_y / static_cast<float>(count);
 
-        // 3. Exponential smoothing against the previous target.
+        // Exponential smoothing against prev_target.
         if (prev_target.has_value()) {
             target.center_x =
                 prev_target->center_x + kSmoothingAlpha * (measured_x - prev_target->center_x);
@@ -51,7 +50,7 @@ CameraTarget PassthroughCamera::update(int64_t /*frame_idx*/,
         }
         target.confidence = sum_conf / static_cast<float>(count);
     } else if (prev_target.has_value()) {
-        // No usable detections this frame: hold the previous target.
+        // If no detections, use the previous target
         target = *prev_target;
     } else {
         target.center_x = static_cast<float>(frame_width) * 0.5f;
@@ -59,7 +58,6 @@ CameraTarget PassthroughCamera::update(int64_t /*frame_idx*/,
         target.confidence = 0.0f;
     }
 
-    // 4. Clamp to panorama bounds.
     target.center_x = std::clamp(target.center_x, 0.0f, static_cast<float>(frame_width));
     target.center_y = std::clamp(target.center_y, 0.0f, static_cast<float>(frame_height));
     return target;
