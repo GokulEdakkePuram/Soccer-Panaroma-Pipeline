@@ -8,27 +8,32 @@
 #include <algorithm>
 #include <iostream>
 
-namespace pipeline {
+namespace pipeline
+{
 
 OpenCvVisualizer::OpenCvVisualizer() = default;
 
-OpenCvVisualizer::~OpenCvVisualizer() {
+OpenCvVisualizer::~OpenCvVisualizer()
+{
     close();
 }
 
-struct OpenCvVisualizer::Impl {
+struct OpenCvVisualizer::Impl
+{
     cv::VideoWriter writer;
     int width = 0;
     int height = 0;
 };
 
-bool OpenCvVisualizer::open(const std::string& output_path, int width, int height, double fps) {
+bool OpenCvVisualizer::open(const std::string &output_path, int width, int height, double fps)
+{
     impl_ = std::make_unique<Impl>();
     impl_->width = width;
     impl_->height = height;
 
     const int fourcc = cv::VideoWriter::fourcc('m', 'p', '4', 'v');
-    if (!impl_->writer.open(output_path, fourcc, fps, cv::Size(width, height))) {
+    if (!impl_->writer.open(output_path, fourcc, fps, cv::Size(width, height)))
+    {
         std::cerr << "Failed to open video writer: " << output_path << '\n';
         impl_.reset();
         return false;
@@ -36,22 +41,22 @@ bool OpenCvVisualizer::open(const std::string& output_path, int width, int heigh
     return true;
 }
 
-void OpenCvVisualizer::render(const Frame& frame,
-                              const std::vector<Detection>& detections,
-                              const CameraTarget& target) {
-    if (!impl_ || !impl_->writer.isOpened()) {
+void OpenCvVisualizer::render(const Frame &frame, const std::vector<Detection> &detections, const CameraTarget &target)
+{
+    if (!impl_ || !impl_->writer.isOpened())
+    {
         return;
     }
 
-    cv::Mat image(frame.height, frame.width, CV_8UC3, const_cast<uint8_t*>(frame.data.data()));
+    cv::Mat image(frame.height, frame.width, CV_8UC3, const_cast<uint8_t *>(frame.data.data()));
     cv::Mat bgr;
     cv::cvtColor(image, bgr, cv::COLOR_RGB2BGR);
 
-    for (const auto& det : detections) {
-        const cv::Rect rect(static_cast<int>(det.bbox.x), static_cast<int>(det.bbox.y),
-                            static_cast<int>(det.bbox.w), static_cast<int>(det.bbox.h));
-        const cv::Scalar color = det.class_id == kSportsBallClassId ? cv::Scalar(0, 255, 255)
-                                                                    : cv::Scalar(0, 255, 0);
+    for (const auto &det : detections)
+    {
+        const cv::Rect rect(static_cast<int>(det.bbox.x), static_cast<int>(det.bbox.y), static_cast<int>(det.bbox.w),
+                            static_cast<int>(det.bbox.h));
+        const cv::Scalar color = det.class_id == kSportsBallClassId ? cv::Scalar(0, 255, 255) : cv::Scalar(0, 255, 0);
         cv::rectangle(bgr, rect, color, 2);
     }
 
@@ -67,11 +72,13 @@ void OpenCvVisualizer::render(const Frame& frame,
     impl_->writer.write(bgr);
 }
 
-void OpenCvVisualizer::close() {
-    if (impl_ && impl_->writer.isOpened()) {
+void OpenCvVisualizer::close()
+{
+    if (impl_ && impl_->writer.isOpened())
+    {
         impl_->writer.release();
     }
     impl_.reset();
 }
 
-}  // namespace pipeline
+} // namespace pipeline

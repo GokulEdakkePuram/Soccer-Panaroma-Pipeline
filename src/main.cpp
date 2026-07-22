@@ -24,59 +24,82 @@
 #include <memory>
 #include <string>
 
-namespace {
+namespace
+{
 
-void print_usage(const char* prog) {
-    std::cerr
-        << "Usage: " << prog
-        << " --video <path> --output <json> [--viz-output <path>]\n"
-        << "       [--model <onnx>] [--start-frame N] [--end-frame N] [--queue-depth N] [--realtime]\n";
+void print_usage(const char *prog)
+{
+    std::cerr << "Usage: " << prog << " --video <path> --output <json> [--viz-output <path>]\n"
+              << "       [--model <onnx>] [--start-frame N] [--end-frame N] [--queue-depth N] [--realtime]\n";
 }
 
-std::optional<pipeline::PipelineConfig> parse_args(int argc, char** argv) {
+std::optional<pipeline::PipelineConfig> parse_args(int argc, char **argv)
+{
     pipeline::PipelineConfig config;
     config.segment.start_frame = 0;
     config.segment.end_frame = -1;
     config.queue_depth = 8;
     config.realtime = false;
 
-    for (int i = 1; i < argc; ++i) {
+    for (int i = 1; i < argc; ++i)
+    {
         const std::string arg = argv[i];
-        auto need_value = [&](const std::string& flag) -> std::string {
-            if (i + 1 >= argc) {
+        auto need_value = [&](const std::string &flag) -> std::string {
+            if (i + 1 >= argc)
+            {
                 std::cerr << "Missing value for " << flag << '\n';
                 std::exit(2);
             }
             return argv[++i];
         };
 
-        if (arg == "--video") {
+        if (arg == "--video")
+        {
             config.video_path = need_value(arg);
-        } else if (arg == "--output") {
+        }
+        else if (arg == "--output")
+        {
             config.output_path = need_value(arg);
-        } else if (arg == "--viz-output") {
+        }
+        else if (arg == "--viz-output")
+        {
             config.viz_output_path = need_value(arg);
-        } else if (arg == "--model") {
+        }
+        else if (arg == "--model")
+        {
             config.model_path = need_value(arg);
-        } else if (arg == "--start-frame") {
+        }
+        else if (arg == "--start-frame")
+        {
             config.segment.start_frame = std::stoll(need_value(arg));
-        } else if (arg == "--end-frame") {
+        }
+        else if (arg == "--end-frame")
+        {
             config.segment.end_frame = std::stoll(need_value(arg));
-        } else if (arg == "--queue-depth") {
+        }
+        else if (arg == "--queue-depth")
+        {
             config.queue_depth = std::stoi(need_value(arg));
-        } else if (arg == "--realtime") {
+        }
+        else if (arg == "--realtime")
+        {
             config.realtime = true;
-        } else if (arg == "--help" || arg == "-h") {
+        }
+        else if (arg == "--help" || arg == "-h")
+        {
             print_usage(argv[0]);
             std::exit(0);
-        } else {
+        }
+        else
+        {
             std::cerr << "Unknown argument: " << arg << '\n';
             print_usage(argv[0]);
             return std::nullopt;
         }
     }
 
-    if (config.video_path.empty() || config.output_path.empty()) {
+    if (config.video_path.empty() || config.output_path.empty())
+    {
         std::cerr << "--video and --output are required\n";
         print_usage(argv[0]);
         return std::nullopt;
@@ -85,21 +108,25 @@ std::optional<pipeline::PipelineConfig> parse_args(int argc, char** argv) {
     return config;
 }
 
-bool model_file_ready(const std::string& model_path) {
+bool model_file_ready(const std::string &model_path)
+{
     namespace fs = std::filesystem;
-    if (!fs::exists(model_path)) {
+    if (!fs::exists(model_path))
+    {
         std::cerr << "Model not found: " << model_path << '\n'
                   << "The task archive may be incomplete; re-download it.\n";
         return false;
     }
 
     std::ifstream file(model_path, std::ios::binary);
-    if (!file) {
+    if (!file)
+    {
         return false;
     }
     char header[16] = {};
     file.read(header, sizeof(header));
-    if (std::string(header, 8) == "version ") {
+    if (std::string(header, 8) == "version ")
+    {
         std::cerr << "Model file is a Git LFS pointer, not ONNX data: " << model_path << '\n'
                   << "Re-download the task archive (maintainers: run git lfs pull).\n";
         return false;
@@ -107,25 +134,30 @@ bool model_file_ready(const std::string& model_path) {
     return true;
 }
 
-std::unique_ptr<pipeline::IVisualizer> make_visualizer(const pipeline::PipelineConfig& config) {
-    if (config.viz_output_path.empty()) {
+std::unique_ptr<pipeline::IVisualizer> make_visualizer(const pipeline::PipelineConfig &config)
+{
+    if (config.viz_output_path.empty())
+    {
         return std::make_unique<pipeline::NullVisualizer>();
     }
     return std::make_unique<pipeline::OpenCvVisualizer>();
 }
 
-}  // namespace
+} // namespace
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv)
+{
     const auto config = parse_args(argc, argv);
-    if (!config.has_value()) {
+    if (!config.has_value())
+    {
         return 2;
     }
 
     // Cap OpenCV's internal thread pool below the core count.
     cv::setNumThreads(std::max(2, cv::getNumberOfCPUs() - 4));
 
-    if (!model_file_ready(config->model_path)) {
+    if (!model_file_ready(config->model_path))
+    {
         return 2;
     }
 
@@ -141,10 +173,11 @@ int main(int argc, char** argv) {
     auto visualizer = make_visualizer(*config);
     auto metrics = std::make_unique<pipeline::MetricsCollector>();
 
-    pipeline::Pipeline pipeline(std::move(reader), std::move(detector), std::move(camera),
-                                std::move(visualizer), std::move(metrics), *config);
+    pipeline::Pipeline pipeline(std::move(reader), std::move(detector), std::move(camera), std::move(visualizer),
+                                std::move(metrics), *config);
 
-    if (!pipeline.run()) {
+    if (!pipeline.run())
+    {
         return 1;
     }
 

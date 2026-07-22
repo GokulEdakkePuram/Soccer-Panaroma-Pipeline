@@ -4,13 +4,15 @@
 
 #include <vector>
 
-namespace pipeline {
+namespace pipeline
+{
 
-class IDetector {
-public:
+class IDetector
+{
+  public:
     virtual ~IDetector() = default;
 
-    virtual std::vector<Detection> process(const Frame& frame) = 0;
+    virtual std::vector<Detection> process(const Frame &frame) = 0;
 };
 
-}  // namespace pipeline
+} // namespace pipeline

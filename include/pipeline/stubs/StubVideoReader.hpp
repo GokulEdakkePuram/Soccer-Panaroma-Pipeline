@@ -4,7 +4,8 @@
 
 #include <opencv2/videoio.hpp>
 
-namespace pipeline {
+namespace pipeline
+{
 
 // Stub video reader — YOUR TASK: replace this with a real implementation.
 //
@@ -16,17 +17,18 @@ namespace pipeline {
 //
 // Any backend is fine: raw FFmpeg (libav* is already linked) or OpenCV
 // cv::VideoCapture (OpenCV is already a dependency).
-class StubVideoReader : public IVideoReader {
-public:
-    bool open(const std::string& path, const Segment& segment) override;
+class StubVideoReader : public IVideoReader
+{
+  public:
+    bool open(const std::string &path, const Segment &segment) override;
     std::optional<Frame> read_next() override;
     bool seek(int64_t frame_idx) override;
     VideoMetadata metadata() const override;
 
-private:
+  private:
     cv::VideoCapture capture_;
     VideoMetadata metadata_;
     int64_t next_frame_idx_ = 0;
 };
 
-}  // namespace pipeline
+} // namespace pipeline

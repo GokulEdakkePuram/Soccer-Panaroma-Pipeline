@@ -2,18 +2,17 @@
 
 #include "pipeline/ICamera.hpp"
 
-namespace pipeline {
+namespace pipeline
+{
 
 // Follow camera: centroid of confident player detections, exponentially
 // smoothed against the previous target and clamped to panorama bounds.
 // Stateless — smoothing state is the prev_target passed in by the pipeline.
-class PassthroughCamera : public ICamera {
-public:
-    CameraTarget update(int64_t frame_idx,
-                        const std::vector<Detection>& detections,
-                        const std::optional<CameraTarget>& prev_target,
-                        int frame_width,
-                        int frame_height) override;
+class PassthroughCamera : public ICamera
+{
+  public:
+    CameraTarget update(int64_t frame_idx, const std::vector<Detection> &detections,
+                        const std::optional<CameraTarget> &prev_target, int frame_width, int frame_height) override;
 };
 
-}  // namespace pipeline
+} // namespace pipeline

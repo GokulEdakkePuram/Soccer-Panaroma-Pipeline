@@ -5,55 +5,64 @@
 #include <string>
 #include <vector>
 
-namespace pipeline {
+namespace pipeline
+{
 
-struct BoundingBox {
+struct BoundingBox
+{
     float x = 0.0f;
     float y = 0.0f;
     float w = 0.0f;
     float h = 0.0f;
 };
 
-struct Frame {
+struct Frame
+{
     int64_t frame_idx = 0;
     double timestamp_ms = 0.0;
     int width = 0;
     int height = 0;
-    std::vector<uint8_t> data;  // RGB, row-major
+    std::vector<uint8_t> data; // RGB, row-major
 };
 
-struct Detection {
+struct Detection
+{
     int class_id = 0;
     float confidence = 0.0f;
     BoundingBox bbox;
 };
 
-struct CameraTarget {
+struct CameraTarget
+{
     float center_x = 0.0f;
     float center_y = 0.0f;
     float confidence = 0.0f;
 };
 
-struct Segment {
+struct Segment
+{
     int64_t start_frame = 0;
-    int64_t end_frame = -1;  // -1 means until EOF
+    int64_t end_frame = -1; // -1 means until EOF
 };
 
-struct StageTimingMs {
+struct StageTimingMs
+{
     double video_reader = 0.0;
     double detector = 0.0;
     double camera = 0.0;
     double visualizer = 0.0;
 };
 
-struct FrameResult {
+struct FrameResult
+{
     int64_t frame_idx = 0;
     double timestamp_ms = 0.0;
     CameraTarget camera_center;
     StageTimingMs stage_ms;
 };
 
-struct PipelineConfig {
+struct PipelineConfig
+{
     std::string video_path;
     std::string output_path;
     std::string viz_output_path;
@@ -63,7 +72,8 @@ struct PipelineConfig {
     bool realtime = false;
 };
 
-struct VideoMetadata {
+struct VideoMetadata
+{
     std::string video_path;
     int width = 0;
     int height = 0;
@@ -72,4 +82,4 @@ struct VideoMetadata {
     Segment segment;
 };
 
-}  // namespace pipeline
+} // namespace pipeline

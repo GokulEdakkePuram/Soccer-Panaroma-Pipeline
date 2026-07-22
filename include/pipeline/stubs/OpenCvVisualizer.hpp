@@ -4,21 +4,21 @@
 
 #include <memory>
 
-namespace pipeline {
+namespace pipeline
+{
 
-class OpenCvVisualizer : public IVisualizer {
-public:
+class OpenCvVisualizer : public IVisualizer
+{
+  public:
     OpenCvVisualizer();
     ~OpenCvVisualizer() override;
-    bool open(const std::string& output_path, int width, int height, double fps) override;
-    void render(const Frame& frame,
-                const std::vector<Detection>& detections,
-                const CameraTarget& target) override;
+    bool open(const std::string &output_path, int width, int height, double fps) override;
+    void render(const Frame &frame, const std::vector<Detection> &detections, const CameraTarget &target) override;
     void close() override;
 
-private:
+  private:
     struct Impl;
     std::unique_ptr<Impl> impl_;
 };
 
-}  // namespace pipeline
+} // namespace pipeline

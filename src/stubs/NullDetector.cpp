@@ -1,9 +1,11 @@
 #include "pipeline/stubs/NullDetector.hpp"
 
-namespace pipeline {
+namespace pipeline
+{
 
-std::vector<Detection> NullDetector::process(const Frame& /*frame*/) {
+std::vector<Detection> NullDetector::process(const Frame & /*frame*/)
+{
     return {};
 }
 
-}  // namespace pipeline
+} // namespace pipeline

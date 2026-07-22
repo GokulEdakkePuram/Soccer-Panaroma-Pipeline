@@ -7,9 +7,11 @@
 #include <cmath>
 #include <vector>
 
-namespace pipeline {
+namespace pipeline
+{
 
-inline float box_iou(const BoundingBox& a, const BoundingBox& b) {
+inline float box_iou(const BoundingBox &a, const BoundingBox &b)
+{
     const float ax2 = a.x + a.w;
     const float ay2 = a.y + a.h;
     const float bx2 = b.x + b.w;
@@ -27,35 +29,42 @@ inline float box_iou(const BoundingBox& a, const BoundingBox& b) {
     const float area_a = a.w * a.h;
     const float area_b = b.w * b.h;
     const float union_area = area_a + area_b - inter_area;
-    if (union_area <= 0.0f) {
+    if (union_area <= 0.0f)
+    {
         return 0.0f;
     }
     return inter_area / union_area;
 }
 
-inline void sort_detections_deterministic(std::vector<Detection>& detections) {
-    std::sort(detections.begin(), detections.end(), [](const Detection& a, const Detection& b) {
-        if (a.bbox.y != b.bbox.y) {
+inline void sort_detections_deterministic(std::vector<Detection> &detections)
+{
+    std::sort(detections.begin(), detections.end(), [](const Detection &a, const Detection &b) {
+        if (a.bbox.y != b.bbox.y)
+        {
             return a.bbox.y < b.bbox.y;
         }
-        if (a.bbox.x != b.bbox.x) {
+        if (a.bbox.x != b.bbox.x)
+        {
             return a.bbox.x < b.bbox.x;
         }
-        if (a.class_id != b.class_id) {
+        if (a.class_id != b.class_id)
+        {
             return a.class_id < b.class_id;
         }
         return a.confidence > b.confidence;
     });
 }
 
-inline std::vector<Detection> nms_detections(const std::vector<Detection>& detections,
-                                             float iou_threshold = kDefaultNmsIouThreshold) {
+inline std::vector<Detection> nms_detections(const std::vector<Detection> &detections,
+                                             float iou_threshold = kDefaultNmsIouThreshold)
+{
     std::vector<Detection> sorted = detections;
     sort_detections_deterministic(sorted);
 
     // Process higher confidence first within each class group.
-    std::sort(sorted.begin(), sorted.end(), [](const Detection& a, const Detection& b) {
-        if (a.class_id != b.class_id) {
+    std::sort(sorted.begin(), sorted.end(), [](const Detection &a, const Detection &b) {
+        if (a.class_id != b.class_id)
+        {
             return a.class_id < b.class_id;
         }
         return a.confidence > b.confidence;
@@ -64,18 +73,23 @@ inline std::vector<Detection> nms_detections(const std::vector<Detection>& detec
     std::vector<Detection> kept;
     kept.reserve(sorted.size());
 
-    for (const auto& candidate : sorted) {
+    for (const auto &candidate : sorted)
+    {
         bool overlaps = false;
-        for (const auto& existing : kept) {
-            if (existing.class_id != candidate.class_id) {
+        for (const auto &existing : kept)
+        {
+            if (existing.class_id != candidate.class_id)
+            {
                 continue;
             }
-            if (box_iou(existing.bbox, candidate.bbox) > iou_threshold) {
+            if (box_iou(existing.bbox, candidate.bbox) > iou_threshold)
+            {
                 overlaps = true;
                 break;
             }
         }
-        if (!overlaps) {
+        if (!overlaps)
+        {
             kept.push_back(candidate);
         }
     }
@@ -84,4 +98,4 @@ inline std::vector<Detection> nms_detections(const std::vector<Detection>& detec
     return kept;
 }
 
-}  // namespace pipeline
+} // namespace pipeline

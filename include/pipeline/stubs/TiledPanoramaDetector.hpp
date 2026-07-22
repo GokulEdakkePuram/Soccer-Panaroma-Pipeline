@@ -4,16 +4,18 @@
 
 #include <memory>
 
-namespace pipeline {
+namespace pipeline
+{
 
-class TiledPanoramaDetector : public IDetector {
-public:
+class TiledPanoramaDetector : public IDetector
+{
+  public:
     explicit TiledPanoramaDetector(std::unique_ptr<IDetector> tile_detector);
 
-    std::vector<Detection> process(const Frame& frame) override;
+    std::vector<Detection> process(const Frame &frame) override;
 
-private:
+  private:
     std::unique_ptr<IDetector> tile_detector_;
 };
 
-}  // namespace pipeline
+} // namespace pipeline

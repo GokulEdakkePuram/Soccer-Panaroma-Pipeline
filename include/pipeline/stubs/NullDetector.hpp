@@ -2,11 +2,13 @@
 
 #include "pipeline/IDetector.hpp"
 
-namespace pipeline {
+namespace pipeline
+{
 
-class NullDetector : public IDetector {
-public:
-    std::vector<Detection> process(const Frame& frame) override;
+class NullDetector : public IDetector
+{
+  public:
+    std::vector<Detection> process(const Frame &frame) override;
 };
 
-}  // namespace pipeline
+} // namespace pipeline

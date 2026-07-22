@@ -1,18 +1,20 @@
 #include "pipeline/stubs/NullVisualizer.hpp"
 
-namespace pipeline {
+namespace pipeline
+{
 
-bool NullVisualizer::open(const std::string& /*output_path*/,
-                          int /*width*/,
-                          int /*height*/,
-                          double /*fps*/) {
+bool NullVisualizer::open(const std::string & /*output_path*/, int /*width*/, int /*height*/, double /*fps*/)
+{
     return true;
 }
 
-void NullVisualizer::render(const Frame& /*frame*/,
-                            const std::vector<Detection>& /*detections*/,
-                            const CameraTarget& /*target*/) {}
+void NullVisualizer::render(const Frame & /*frame*/, const std::vector<Detection> & /*detections*/,
+                            const CameraTarget & /*target*/)
+{
+}
 
-void NullVisualizer::close() {}
+void NullVisualizer::close()
+{
+}
 
-}  // namespace pipeline
+} // namespace pipeline

@@ -7,11 +7,15 @@
 #include <fstream>
 #include <numeric>
 
-namespace pipeline {
-namespace {
+namespace pipeline
+{
+namespace
+{
 
-double percentile(std::vector<double> values, double p) {
-    if (values.empty()) {
+double percentile(std::vector<double> values, double p)
+{
+    if (values.empty())
+    {
         return 0.0;
     }
     const size_t idx = static_cast<size_t>(p * (values.size() - 1));
@@ -19,12 +23,15 @@ double percentile(std::vector<double> values, double p) {
     return values[idx];
 }
 
-StageTimingMs average_stage_timing(const std::vector<FrameResult>& results) {
+StageTimingMs average_stage_timing(const std::vector<FrameResult> &results)
+{
     StageTimingMs avg{};
-    if (results.empty()) {
+    if (results.empty())
+    {
         return avg;
     }
-    for (const auto& r : results) {
+    for (const auto &r : results)
+    {
         avg.video_reader += r.stage_ms.video_reader;
         avg.detector += r.stage_ms.detector;
         avg.camera += r.stage_ms.camera;
@@ -38,9 +45,11 @@ StageTimingMs average_stage_timing(const std::vector<FrameResult>& results) {
     return avg;
 }
 
-StageTimingMs p95_stage_timing(const std::vector<FrameResult>& results) {
+StageTimingMs p95_stage_timing(const std::vector<FrameResult> &results)
+{
     StageTimingMs p95{};
-    if (results.empty()) {
+    if (results.empty())
+    {
         return p95;
     }
     std::vector<double> vr, det, cam, vis;
@@ -48,7 +57,8 @@ StageTimingMs p95_stage_timing(const std::vector<FrameResult>& results) {
     det.reserve(results.size());
     cam.reserve(results.size());
     vis.reserve(results.size());
-    for (const auto& r : results) {
+    for (const auto &r : results)
+    {
         vr.push_back(r.stage_ms.video_reader);
         det.push_back(r.stage_ms.detector);
         cam.push_back(r.stage_ms.camera);
@@ -61,29 +71,31 @@ StageTimingMs p95_stage_timing(const std::vector<FrameResult>& results) {
     return p95;
 }
 
-}  // namespace
+} // namespace
 
-void MetricsCollector::record_frame(const FrameResult& result) {
+void MetricsCollector::record_frame(const FrameResult &result)
+{
     results_.push_back(result);
 }
 
-std::vector<FrameResult> MetricsCollector::results() const {
+std::vector<FrameResult> MetricsCollector::results() const
+{
     return results_;
 }
 
-void MetricsCollector::write_json(const std::string& output_path,
-                                  const VideoMetadata& metadata) const {
+void MetricsCollector::write_json(const std::string &output_path, const VideoMetadata &metadata) const
+{
     nlohmann::json doc;
     doc["metadata"] = {
         {"video", metadata.video_path},
         {"width", metadata.width},
         {"height", metadata.height},
         {"fps", metadata.fps},
-        {"segment", {{"start_frame", metadata.segment.start_frame},
-                      {"end_frame", metadata.segment.end_frame}}}};
+        {"segment", {{"start_frame", metadata.segment.start_frame}, {"end_frame", metadata.segment.end_frame}}}};
 
     nlohmann::json frames = nlohmann::json::array();
-    for (const auto& r : results_) {
+    for (const auto &r : results_)
+    {
         frames.push_back({
             {"frame_idx", r.frame_idx},
             {"timestamp_ms", r.timestamp_ms},
@@ -121,4 +133,4 @@ void MetricsCollector::write_json(const std::string& output_path,
     out << doc.dump(2) << '\n';
 }
 
-}  // namespace pipeline
+} // namespace pipeline

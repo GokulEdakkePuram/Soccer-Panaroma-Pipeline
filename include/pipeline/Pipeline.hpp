@@ -10,7 +10,8 @@
 #include <memory>
 #include <optional>
 
-namespace pipeline {
+namespace pipeline
+{
 
 // Sequential baseline pipeline: reads, detects, updates the camera, visualizes,
 // and records metrics one frame at a time on a single thread.
@@ -20,18 +21,15 @@ namespace pipeline {
 // running in parallel, bounded queues between them, and backpressure so memory
 // stays flat regardless of video length. Keep the constructor and run() contract
 // so main.cpp and the eval harness continue to work.
-class Pipeline {
-public:
-    Pipeline(std::unique_ptr<IVideoReader> reader,
-             std::unique_ptr<IDetector> detector,
-             std::unique_ptr<ICamera> camera,
-             std::unique_ptr<IVisualizer> visualizer,
-             std::unique_ptr<IMetrics> metrics,
-             PipelineConfig config);
+class Pipeline
+{
+  public:
+    Pipeline(std::unique_ptr<IVideoReader> reader, std::unique_ptr<IDetector> detector, std::unique_ptr<ICamera> camera,
+             std::unique_ptr<IVisualizer> visualizer, std::unique_ptr<IMetrics> metrics, PipelineConfig config);
 
     bool run();
 
-private:
+  private:
     std::unique_ptr<IVideoReader> reader_;
     std::unique_ptr<IDetector> detector_;
     std::unique_ptr<ICamera> camera_;
@@ -43,4 +41,4 @@ private:
     std::optional<CameraTarget> prev_target_;
 };
 
-}  // namespace pipeline
+} // namespace pipeline
