@@ -78,6 +78,12 @@ void MetricsCollector::record_frame(const FrameResult &result)
     results_.push_back(result);
 }
 
+void MetricsCollector::record_error(const std::string &stage, const std::string &message)
+{
+    error_stage_ = stage;
+    error_message_ = message;
+}
+
 std::vector<FrameResult> MetricsCollector::results() const
 {
     return results_;
@@ -128,6 +134,13 @@ void MetricsCollector::write_json(const std::string &output_path, const VideoMet
           {"camera", p95.camera},
           {"visualizer", p95.visualizer}}},
     };
+
+    // Present only on a failed run: the frames and summary above then cover
+    // whatever was processed before the pipeline stopped.
+    if (!error_message_.empty())
+    {
+        doc["error"] = {{"stage", error_stage_}, {"message", error_message_}};
+    }
 
     std::ofstream out(output_path);
     out << doc.dump(2) << '\n';

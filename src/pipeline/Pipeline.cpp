@@ -110,10 +110,20 @@ Pipeline::Pipeline(std::unique_ptr<IVideoReader> reader, std::unique_ptr<IDetect
 
 bool Pipeline::run()
 {
+    metadata_.video_path = config_.video_path;
+
+    // A failed run still writes the output JSON, with an "error" object saying
+    // what stopped it.
+    auto report_failure = [&](const std::string &stage, const std::string &what) {
+        std::cerr << "Pipeline failed: " << stage << ": " << what << '\n';
+        metrics_->record_error(stage, what);
+        metrics_->write_json(config_.output_path, metadata_);
+        return false;
+    };
+
     if (!reader_->open(config_.video_path, config_.segment))
     {
-        std::cerr << "Failed to open video reader\n";
-        return false;
+        return report_failure("video_reader", "Failed to open video reader");
     }
 
     metadata_ = reader_->metadata();
@@ -126,8 +136,7 @@ bool Pipeline::run()
     {
         if (!visualizer_->open(config_.viz_output_path, metadata_.width, metadata_.height, metadata_.fps))
         {
-            std::cerr << "Failed to open visualizer output\n";
-            return false;
+            return report_failure("visualizer", "Failed to open visualizer output");
         }
     }
 
@@ -150,6 +159,7 @@ bool Pipeline::run()
 
     std::atomic<bool> failed{false};
     std::mutex error_mutex;
+    std::string error_stage;
     std::string error_message;
 
     auto fail = [&](const std::string &stage, const std::string &what) {
@@ -157,7 +167,8 @@ bool Pipeline::run()
             std::lock_guard<std::mutex> lock(error_mutex);
             if (error_message.empty())
             {
-                error_message = stage + ": " + what;
+                error_stage = stage;
+                error_message = what;
             }
         }
         failed.store(true);
@@ -270,8 +281,7 @@ bool Pipeline::run()
     if (failed.load())
     {
         std::lock_guard<std::mutex> lock(error_mutex);
-        std::cerr << "Pipeline failed: " << error_message << '\n';
-        return false;
+        return report_failure(error_stage, error_message);
     }
 
     metrics_->write_json(config_.output_path, metadata_);

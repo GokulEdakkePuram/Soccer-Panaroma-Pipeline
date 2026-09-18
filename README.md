@@ -105,6 +105,12 @@ Backpressure: `BoundedQueue::push()` blocks when its queue is full, so a slow de
 
 Shutdown: end of video closes both queues (`close()`), which drains normally downstream. An exception in any stage goes through a shared `fail()` that records the first error and `abort()`s both queues, unblocking anything sleeping in `push()`/`pop()`. `run()` always joins both threads before returning, success or failure.
 
+Either way the output JSON gets written. A failed run carries an extra `"error"` object (`stage` and `message`) alongside whatever frames were processed before it stopped, so a caller sees why it stopped without parsing stderr:
+
+```json
+"error": { "stage": "detector", "message": "..." }
+```
+
 `--realtime` paces the reader to the video's fps with a running deadline + `sleep_until`, not `sleep_for` after each frame, otherwise decode time and any stalls accumulate into drift over a long video instead of self-correcting against the schedule.
 
 ### Queue depth
