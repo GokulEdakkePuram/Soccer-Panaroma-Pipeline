@@ -1,4 +1,4 @@
-# Soccer Panorama Pipeline — Hiring Test
+# Soccer Panorama Pipeline
 
 A C++ pipeline that reads panoramic soccer video and outputs per-frame camera-center tracking as JSON.
 
